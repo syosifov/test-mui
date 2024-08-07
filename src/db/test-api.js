@@ -37,7 +37,10 @@ export const getProducts = (url) => {
     // console.log("sorting:");
     // console.log(sorting);
 
-    let data = allProducts;
+    let unfilteredData = allProducts;
+
+    let filteredDataForAllFields = getFilteredDataForEveryField(allProducts, filters);
+
     let meta = {};
 
 
@@ -45,49 +48,47 @@ export const getProducts = (url) => {
 
     if (priceFilter) {
 
-        let filteredData = getFilteredDataForEveryFieldExceptOne(data, filters, "price");
+        let filteredData = getFilteredDataForEveryFieldExceptOne(unfilteredData, filters, "price");
         const minMaxPrice = getMinMaxPrice(filteredData);
         meta.minMaxPrice = minMaxPrice;
 
+    }else{
+
+        const minMaxPrice = getMinMaxPrice(filteredDataForAllFields);
+        meta.minMaxPrice = minMaxPrice;
     }
 
     const categoryFilter = filters.find((filter) => filter.id == "category");
 
     if (categoryFilter) {
 
-        let filteredData = getFilteredDataForEveryFieldExceptOne(data, filters, "category");
+        let filteredData = getFilteredDataForEveryFieldExceptOne(unfilteredData, filters, "category");
         const categoriesList = getCategoriesList(filteredData);
+        meta.categoriesList = categoriesList;
+
+    }else{
+        const categoriesList = getCategoriesList(filteredDataForAllFields);
         meta.categoriesList = categoriesList;
 
     }
 
     const brandsFilter = filters.find((filter) => filter.id == "brand");
-    console.log(brandsFilter);
 
     if (brandsFilter) {
 
-        let filteredData = getFilteredDataForEveryFieldExceptOne(data, filters, "brand");
+        let filteredData = getFilteredDataForEveryFieldExceptOne(unfilteredData, filters, "brand");
         const brandsList = getBrandsList(filteredData);
         meta.brandsList = brandsList;
 
-    }
+    }else{
 
-    data = getFilteredDataForEveryField(data, filters);
-
-
-    if (!priceFilter) {
-        const minMaxPrice = getMinMaxPrice(data);
-        meta.minMaxPrice = minMaxPrice;
-    }
-    if (!categoryFilter) {
-        const categoriesList = getCategoriesList(data);
-        meta.categoriesList = categoriesList;
-    }
-    if (!brandsFilter) {
-        const brandsList = getBrandsList(data);
+        const brandsList = getBrandsList(filteredDataForAllFields);
         meta.brandsList = brandsList;
     }
 
+    
+
+    let data = filteredDataForAllFields;
     const totalRowCount = data.length;
     meta.totalRowCount = totalRowCount;
 
